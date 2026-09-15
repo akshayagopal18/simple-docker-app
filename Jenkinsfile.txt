@@ -1,0 +1,33 @@
+pipeline {
+
+    agent any
+
+    stages {
+
+        stage('Build') {
+            steps {
+                echo 'Building Docker image...'
+                sh 'docker build -t simple-docker-app:v1 .'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                echo 'Running application test...'
+                sh 'docker run --rm simple-docker-app:v1 node test.js'
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                echo 'Deploying application...'
+
+                sh '''
+                    docker stop simple-app || true
+                    docker rm simple-app || true
+                    docker run -d --name simple-app -p 3000:3000 simple-docker-app:v1
+                '''
+            }
+        }
+    }
+}
